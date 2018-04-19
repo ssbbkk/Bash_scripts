@@ -131,14 +131,14 @@ echo -e $flashred "ERROR: " $clear $red "Something went wrong" $clear
 
 # ANOTHER STYLE METHOD - TPUT (more info - man terminfo):
 
-tput setaf [0-7]	# foreground
-tput setab [0-7]	# background
-tput sgr0		# no style
-tput bold		# bold
-tput dim		# low intensity
-tput smul		# underline
-tput blink		# blinking
-tput rev		# reverse
+# tput setaf [0-7]	# foreground
+# tput setab [0-7]	# background
+# tput sgr0		# no style
+# tput bold		# bold
+# tput dim		# low intensity
+# tput smul		# underline
+# tput blink		# blinking
+# tput rev		# reverse
 
 # black         setaf: 0   setab: 0
 # red           setaf: 1   setab: 1
@@ -159,6 +159,274 @@ echo -e $flashred "ERROR: " $clear $red "Something went wrong" $clear
 
 
 #----------------------------------------------------------------------
+
+
+# DATE and PRINTF:
+
+date +"%F %G"		# displaying date in the specified format here: 2018-04-18 22:34
+
+date +"%d-%m-%Y"	# gives: 18-04-2018
+
+date +"%H:%M:%S"	# gives: 22:34:22
+
+------
+
+printf "Name:\t%s\nID:\t%04d\n" "Scott" "12"		# %04d - fill the empty fileds (on four digit field) which ... 
+							# ... left after putting the decimal number
+Name:	Scott
+ID:	0012
+
+
+Example:
+
+today=$(date +"%d-%m-%Y")
+time=$(date +"%H:%M:S")
+
+printf -v d "Current User:\t%s\nDate:\t\t%s @ %s\n" $USER $today $time		# printd -v d - will pass the result of command to variable d
+
+echo "$d"
+
+
+#-------------------------------------------------------------------------
+
+# ARRAYS
+
+a=()
+b=("apple" "banana" "orange")
+
+echo ${b[2]}			# retieving element with index 2 (starting from 0) of array b, here: orange
+
+b[5]="kiwi"			# setting the value of  element with index 5, here as "kiwi"
+
+b+=("mango")			# adding the element at the end of array
+
+echo ${b[@]}			# displaying whole array
+
+echo ${b[@]: -1}		# displaying the last element of array
+
+---
+# Example:
+
+declare -A myarray				# declarring an array type variable
+myarray["color"]="blue"
+myarray["office building"]="HQ West"		# keys and values containing space must be put in double quotes ""
+
+echo "${myarray["office building"]} is ${myarray["color"]}"		# will give as a result: HQ West is blue
+
+
+#------------------------------------------------------------------------
+
+# READING and WRITING test files
+
+echo "Some text" > file.txt
+echo "Some more text" >> file.txt
+
+Example_1:			# This script will read all nonempty lines in file and will return "Line <number>: <line value>"
+
+i=1
+while read f; do
+	echo "Line $i: $f"
+	((i++))
+done < file.txt
+
+-----------------------
+
+# Example_2:
+ftp.txt:
+
+open mirrors.xmiss.com
+user anonymous nothinghere
+ascii
+cd gutenberg
+get GUTINDEX.00 
+
+.....
+
+execution:
+
+ftp -n <ftp.txt		$ ftp -n read user as defined in file, not the one you are currently using; script will read all commands form file
+
+
+#--------------------------------------------------------------------------------
+
+# bash HERE DOCUMENTS
+
+Example_1:
+
+cat <<- EOF		# <<- will ingore the leading tabulators and will display all lines in the same indent
+This is a
+	multiline
+	text string
+EOF
+
+----------
+
+Example_2:
+
+ftp -n <<- DoneWithTheUpdate
+	open mirrors.xmission.com
+	user anonymous nothinghere
+	ascii
+	cd gutenberg
+	get GUTINDEX.01
+	bye
+DoneWithTheUpdate
+
+
+#------------------------------------------------------------------------------
+
+# IF conditioning statement
+
+if expression; then		#
+if ( expression ); then		# for integers, eg if ( 2 -gt 1 )
+if [ expression ]; then		#
+if [[ expression ]]; then	# 
+
+Examples:
+---------------------
+
+if expression1; then
+    echo "True"
+elif expression2; then
+    echo "expression1 is False, expression2 is true"
+fi
+
+---------------------
+
+a="This is my string!"
+if [[ $a =~ [0-9]+ ]]; then		# $a =~ [0-9]+ checks if there is one or more digits from 0-9 in $a
+	echo "There are numbers in string: $a"
+else
+	echo "The string \"$a\" does not contain any digits"
+fi
+
+
+#---------------------------------------------------------------------------------
+
+# WHILE and UNTIL loops
+
+
+i=0
+while [ $i -le 10 ]; do
+	echo i:$i
+	((i+=1))
+done
+
+# or ine one line
+
+while [ $i -le 10 ];do echo i:$i; ((i+=1));done
+
+#-----------------------
+
+j=0
+until [ $j -ge 10 ]; do
+	echo j:$j
+	((j+=1))
+done
+
+
+#---------------------------------------------------------------------------------
+
+# FOR loop
+
+for i in 1 2 3; do echo $i; done 
+for i in {1..100}; do echo $i; done
+for i in {1..100..2}; do echo $i; done		# from 1 to 100 with interval=2
+for (( i=1; i<=10; i++ )); do echo $i; done	# expression like in C++ language
+
+
+# Examples:
+
+arr=("apple" "banana" "mango")		# working with arrays works only in bash v4 and above
+for i in ${arr[@]}
+do
+	echo $i
+done
+
+#---------------------
+
+declare -A array
+array["name"]="Scott"
+array["id"]="1234"
+
+for o in "${!array[@]}"		# accessing keys in array "${}" because keys are string and may contain space
+do
+	echo "$i: ${array[$i]}"
+done
+
+
+#---------------------------------------------------------------------------------
+
+# CASE statement
+
+a="dog"
+case $a in
+	cat) echo "Feline";;
+	dog|puppy) echo "Canine";;
+	*) echo "No match!"
+esac
+
+#---------------------------------------------------------------------------------
+
+# FUNCTIONS
+
+function greet {
+	echo "Hi, $1!"		# $1 passes the first argument given to function, $2 second and so on, reaching 10 argument: ${10}
+}
+
+echo "And now, the greeting!"
+greet Scott			# calling the function with given parameter, here "Scott"
+
+
+#--------------------
+
+function numberthings {
+	i=1
+	for f in $@; do				# $@ represents every argument passed into function
+		echo $i: $f
+		((i+=1))
+	done
+}
+
+numberthings $(ls)		# will number every line of the output of ls
+
+#or
+
+numberthings() {
+}
+
+#---------------------------------------------------------------------------------
+
+# ARGUMENTS
+
+
+$1	# the first argument
+$2	# the second argument
+#...
+${10}	# the tenth argument
+
+$@	# any argument
+$#	# the number of arguments
+
+#----------------------------------------------------------------------------------
+
+# FLAGS
+
+while getopts u:p: option; do		# u:p: - : means there we expect required thearound each flag
+	case $option in
+		u) user=$OPTARG;;
+		p) pass=$OPTARG;;
+	esac
+done
+
+echo "User: $user / Pass: $pass"
+
+# calling this script
+
+my.sh -u scott -p secret
+
+
+
 
 
 
