@@ -407,7 +407,7 @@ ${10}	# the tenth argument
 
 $@	# any argument
 $#	# the number of arguments
-
+$0	# returns the name of script
 #----------------------------------------------------------------------------------
 
 # FLAGS
