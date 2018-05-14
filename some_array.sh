@@ -1,7 +1,7 @@
 #!/bin/bash
 # Some simple script for reading the lines in file into an array
 
-declare -A array
+declare -a array
 i=1
 while read x; do
 	array[$i]="$x"	
